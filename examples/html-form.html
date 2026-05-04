@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Formulario HTML conectado al sistema de leads</title>
+</head>
+<body>
+    <form id="lead-form">
+        <input type="hidden" name="source_site" value="web-html-ejemplo">
+        <input type="hidden" name="form_name" value="contacto_html">
+        <input type="hidden" name="source_url" id="source_url">
+        <input type="hidden" name="referrer" id="referrer">
+        <input type="hidden" name="utm_source" id="utm_source">
+        <input type="hidden" name="utm_medium" id="utm_medium">
+        <input type="hidden" name="utm_campaign" id="utm_campaign">
+        <input type="hidden" name="utm_term" id="utm_term">
+        <input type="hidden" name="utm_content" id="utm_content">
+
+        <!-- Honeypot: ocultar con CSS, no con type=hidden -->
+        <p style="position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden;">
+            <label>Website <input name="website" tabindex="-1" autocomplete="off"></label>
+        </p>
+
+        <p>
+            <label>Nombre<br><input name="name" autocomplete="name"></label>
+        </p>
+        <p>
+            <label>Email<br><input name="email" type="email" autocomplete="email"></label>
+        </p>
+        <p>
+            <label>Teléfono<br><input name="phone" autocomplete="tel"></label>
+        </p>
+        <p>
+            <label>Mensaje<br><textarea name="message"></textarea></label>
+        </p>
+        <p>
+            <label><input type="checkbox" name="consent" value="1" required> Acepto la política de privacidad</label>
+        </p>
+
+        <!-- Si activas Turnstile, añade el widget oficial y envía cf-turnstile-response -->
+
+        <button type="submit">Enviar</button>
+        <p id="form-result" aria-live="polite"></p>
+    </form>
+
+    <script>
+        const endpoint = 'https://leads.tudominio.com/api/lead.php';
+        const params = new URLSearchParams(window.location.search);
+        const utms = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
+
+        document.getElementById('source_url').value = window.location.href;
+        document.getElementById('referrer').value = document.referrer || '';
+        utms.forEach((key) => {
+            const field = document.getElementById(key);
+            if (field) field.value = params.get(key) || '';
+        });
+
+        document.getElementById('lead-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const result = document.getElementById('form-result');
+            result.textContent = 'Enviando...';
+
+            const formData = new FormData(event.currentTarget);
+            const payload = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+                    result.textContent = data.message || 'No se ha podido enviar.';
+                    return;
+                }
+
+                event.currentTarget.reset();
+                result.textContent = 'Gracias. Hemos recibido tu mensaje.';
+            } catch (error) {
+                result.textContent = 'No se ha podido enviar. Inténtalo más tarde.';
+            }
+        });
+    </script>
+</body>
+</html>
