@@ -20,7 +20,7 @@ header('Content-Disposition: attachment; filename="leads-' . date('Y-m-d') . '.c
 
 $output = fopen('php://output', 'w');
 fputcsv($output, [
-    'fecha',
+    'fecha_madrid',
     'nombre',
     'email',
     'telefono',
@@ -47,7 +47,7 @@ fputcsv($output, [
 
 foreach ($leads as $lead) {
     fputcsv($output, [
-        $lead['created_at'],
+        Time::format($lead['created_at'], 'Y-m-d H:i:s'),
         $lead['name'],
         $lead['email'],
         $lead['phone'],

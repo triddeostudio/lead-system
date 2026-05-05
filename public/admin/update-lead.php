@@ -28,10 +28,8 @@ if (!in_array($priority, ['baja','media','alta','urgente'], true)) {
     $priority = 'media';
 }
 
-$nextAction = Security::cleanString($_POST['next_action_at'] ?? null, 40);
-if ($nextAction !== null) {
-    $nextAction = str_replace('T', ' ', $nextAction);
-}
+$nextActionInput = Security::cleanString($_POST['next_action_at'] ?? null, 40);
+$nextAction = Time::fromLocalInput($nextActionInput);
 
 $repository = new LeadRepository();
 $repository->update($id, [

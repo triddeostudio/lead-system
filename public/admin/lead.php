@@ -51,7 +51,7 @@ if ($rawPayload) {
             <div>
                 <p><a href="/admin/">← Volver</a></p>
                 <h1><?= Security::e($lead['name'] ?: 'Lead sin nombre') ?></h1>
-                <p class="small">Recibido el <?= Security::e(date('d/m/Y H:i', strtotime($lead['created_at']))) ?></p>
+                <p class="small">Recibido el <?= Security::e(Time::format($lead['created_at'])) ?></p>
             </div>
             <a class="button secondary" href="/admin/logout.php">Salir</a>
         </header>
@@ -133,7 +133,7 @@ if ($rawPayload) {
 
                     <div class="form-row">
                         <label for="next_action_at">Próxima acción</label>
-                        <input id="next_action_at" name="next_action_at" type="datetime-local" value="<?= $lead['next_action_at'] ? Security::e(date('Y-m-d\TH:i', strtotime($lead['next_action_at']))) : '' ?>">
+                        <input id="next_action_at" name="next_action_at" type="datetime-local" value="<?= $lead['next_action_at'] ? Security::e(Time::datetimeLocal($lead['next_action_at'])) : '' ?>">
                     </div>
 
                     <div class="form-row">
@@ -155,7 +155,7 @@ if ($rawPayload) {
                 <tbody>
                     <?php foreach ($events as $event): ?>
                         <tr>
-                            <td><?= Security::e(date('d/m/Y H:i', strtotime($event['created_at']))) ?></td>
+                            <td><?= Security::e(Time::format($event['created_at'])) ?></td>
                             <td><?= Security::e($event['event_type']) ?></td>
                             <td><?= Security::e($event['created_by']) ?></td>
                             <td><code><?= Security::e($event['event_data']) ?></code></td>

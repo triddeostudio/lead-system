@@ -103,7 +103,7 @@ function external_url(?string $url): string
                             $clientWebsite = external_url($lead['client_website'] ?? '');
                         ?>
                         <tr>
-                            <td><?= Security::e(date('d/m/Y H:i', strtotime($lead['created_at']))) ?></td>
+                            <td><?= Security::e(Time::format($lead['created_at'])) ?></td>
                             <td>
                                 <a href="/admin/lead.php?id=<?= Security::e($lead['id']) ?>"><strong><?= Security::e($lead['name'] ?: 'Sin nombre') ?></strong></a><br>
                                 <span class="small"><?= Security::e($lead['email']) ?></span><br>
