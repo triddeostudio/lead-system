@@ -11,13 +11,13 @@ final class LeadRepository
         $sql = "
             INSERT INTO leads (
                 source_site, source_url, form_name,
-                name, email, phone, company, message,
+                name, email, phone, company, client_website, message,
                 utm_source, utm_medium, utm_campaign, utm_term, utm_content,
                 referrer, ip_address, user_agent,
                 status, priority, consent, spam_score, raw_payload
             ) VALUES (
                 :source_site, :source_url, :form_name,
-                :name, :email, :phone, :company, :message,
+                :name, :email, :phone, :company, :client_website, :message,
                 :utm_source, :utm_medium, :utm_campaign, :utm_term, :utm_content,
                 :referrer, :ip_address, :user_agent,
                 :status, :priority, :consent, :spam_score, :raw_payload
@@ -33,6 +33,7 @@ final class LeadRepository
             'email' => $lead['email'] ?? null,
             'phone' => $lead['phone'] ?? null,
             'company' => $lead['company'] ?? null,
+            'client_website' => $lead['client_website'] ?? null,
             'message' => $lead['message'] ?? null,
             'utm_source' => $lead['utm_source'] ?? null,
             'utm_medium' => $lead['utm_medium'] ?? null,
@@ -72,7 +73,7 @@ final class LeadRepository
         }
 
         if (!empty($filters['q'])) {
-            $where[] = '(name ILIKE :q OR email ILIKE :q OR phone ILIKE :q OR message ILIKE :q OR company ILIKE :q)';
+            $where[] = '(name ILIKE :q OR email ILIKE :q OR phone ILIKE :q OR message ILIKE :q OR company ILIKE :q OR client_website ILIKE :q)';
             $params['q'] = '%' . $filters['q'] . '%';
         }
 
