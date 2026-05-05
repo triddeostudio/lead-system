@@ -15,6 +15,7 @@ require_once __DIR__ . '/LeadRepository.php';
 require_once __DIR__ . '/LeadValidator.php';
 require_once __DIR__ . '/MailService.php';
 require_once __DIR__ . '/Auth.php';
+require_once __DIR__ . '/Time.php';
 
 Config::load($rootPath);
 
