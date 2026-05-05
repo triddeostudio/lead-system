@@ -12,6 +12,7 @@ final class LeadValidator
         $email = Security::cleanString($input['email'] ?? null, 255);
         $phone = Security::cleanString($input['phone'] ?? $input['telefono'] ?? null, 50);
         $company = Security::cleanString($input['company'] ?? $input['empresa'] ?? null, 200);
+        $clientWebsite = Security::cleanString($input['website'] ?? $input['client_website'] ?? $input['website_url'] ?? $input['web'] ?? null, 500);
         $message = Security::cleanString($input['message'] ?? $input['mensaje'] ?? null, 5000);
 
         if (!$email && !$phone) {
@@ -35,6 +36,7 @@ final class LeadValidator
             'email' => $email,
             'phone' => $phone,
             'company' => $company,
+            'client_website' => $clientWebsite,
             'message' => $message,
             'source_site' => Security::cleanString($input['source_site'] ?? $_SERVER['HTTP_ORIGIN'] ?? null, 255),
             'source_url' => Security::cleanString($input['source_url'] ?? null, 1000),

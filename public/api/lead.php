@@ -50,7 +50,8 @@ if (str_contains(strtolower($contentType), 'application/json')) {
 }
 
 // Honeypot: si un bot rellena este campo, respondemos éxito falso-positivo y no guardamos.
-$honeypot = trim((string) ($input['website'] ?? $input['hp_field'] ?? ''));
+// No usamos `website` como honeypot porque puede ser un campo real del lead.
+$honeypot = trim((string) ($input['_hp_website'] ?? $input['hp_field'] ?? ''));
 if ($honeypot !== '') {
     Logger::info('Honeypot triggered.', ['ip' => $ip]);
     Response::json(['success' => true, 'message' => 'Lead recibido correctamente']);
