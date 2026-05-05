@@ -19,7 +19,31 @@ header('Content-Type: text/csv; charset=utf-8');
 header('Content-Disposition: attachment; filename="leads-' . date('Y-m-d') . '.csv"');
 
 $output = fopen('php://output', 'w');
-fputcsv($output, ['fecha','nombre','email','telefono','empresa','web_del_lead','mensaje','web_origen','url_origen','formulario','estado','prioridad','utm_source','utm_medium','utm_campaign','notas']);
+fputcsv($output, [
+    'fecha',
+    'nombre',
+    'email',
+    'telefono',
+    'empresa',
+    'web_del_lead',
+    'mensaje',
+    'web_origen',
+    'landing_exacta',
+    'formulario',
+    'estado',
+    'prioridad',
+    'utm_source',
+    'utm_medium',
+    'utm_campaign',
+    'utm_term',
+    'utm_content',
+    'referrer',
+    'ip',
+    'user_agent',
+    'consentimiento',
+    'notas',
+    'raw_payload',
+]);
 
 foreach ($leads as $lead) {
     fputcsv($output, [
@@ -38,7 +62,14 @@ foreach ($leads as $lead) {
         $lead['utm_source'],
         $lead['utm_medium'],
         $lead['utm_campaign'],
+        $lead['utm_term'],
+        $lead['utm_content'],
+        $lead['referrer'],
+        $lead['ip_address'],
+        $lead['user_agent'],
+        $lead['consent'] ? 'sí' : 'no',
         $lead['notes'],
+        $lead['raw_payload'],
     ]);
 }
 

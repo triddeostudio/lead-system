@@ -17,6 +17,25 @@ if (!$lead) {
 }
 
 $events = $repository->events($id);
+
+function detail_external_url(?string $url): string
+{
+    $url = trim((string) $url);
+    if ($url === '') {
+        return '';
+    }
+
+    return str_starts_with($url, 'http://') || str_starts_with($url, 'https://')
+        ? $url
+        : 'https://' . $url;
+}
+
+$rawPayload = $lead['raw_payload'] ?? '';
+$prettyPayload = '';
+if ($rawPayload) {
+    $decodedPayload = json_decode((string) $rawPayload, true);
+    $prettyPayload = json_encode($decodedPayload ?: $rawPayload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+}
 ?>
 <!doctype html>
 <html lang="es">
@@ -44,19 +63,43 @@ $events = $repository->events($id);
                     <dt>Email</dt><dd><?= Security::e($lead['email']) ?></dd>
                     <dt>Teléfono</dt><dd><?= Security::e($lead['phone']) ?></dd>
                     <dt>Empresa</dt><dd><?= Security::e($lead['company']) ?></dd>
-                    <dt>Web del lead</dt><dd><?= !empty($lead['client_website']) ? '<a href="' . Security::e(str_starts_with($lead['client_website'], 'http') ? $lead['client_website'] : 'https://' . $lead['client_website']) . '" target="_blank" rel="noopener">' . Security::e($lead['client_website']) . '</a>' : '' ?></dd>
+                    <dt>Web del lead</dt>
+                    <dd>
+                        <?php if (!empty($lead['client_website'])): ?>
+                            <a href="<?= Security::e(detail_external_url($lead['client_website'])) ?>" target="_blank" rel="noopener"><?= Security::e($lead['client_website']) ?></a>
+                        <?php endif; ?>
+                    </dd>
                     <dt>Web origen</dt><dd><?= Security::e($lead['source_site']) ?></dd>
-                    <dt>URL origen</dt><dd><?= $lead['source_url'] ? '<a href="' . Security::e($lead['source_url']) . '" target="_blank" rel="noopener">' . Security::e($lead['source_url']) . '</a>' : '' ?></dd>
+                    <dt>Landing exacta</dt>
+                    <dd>
+                        <?php if (!empty($lead['source_url'])): ?>
+                            <a href="<?= Security::e($lead['source_url']) ?>" target="_blank" rel="noopener"><?= Security::e($lead['source_url']) ?></a>
+                        <?php endif; ?>
+                    </dd>
                     <dt>Formulario</dt><dd><?= Security::e($lead['form_name']) ?></dd>
+                    <dt>Referrer</dt>
+                    <dd>
+                        <?php if (!empty($lead['referrer'])): ?>
+                            <a href="<?= Security::e($lead['referrer']) ?>" target="_blank" rel="noopener"><?= Security::e($lead['referrer']) ?></a>
+                        <?php endif; ?>
+                    </dd>
                     <dt>UTM source</dt><dd><?= Security::e($lead['utm_source']) ?></dd>
                     <dt>UTM medium</dt><dd><?= Security::e($lead['utm_medium']) ?></dd>
                     <dt>UTM campaign</dt><dd><?= Security::e($lead['utm_campaign']) ?></dd>
+                    <dt>UTM term</dt><dd><?= Security::e($lead['utm_term']) ?></dd>
+                    <dt>UTM content</dt><dd><?= Security::e($lead['utm_content']) ?></dd>
                     <dt>IP</dt><dd><?= Security::e($lead['ip_address']) ?></dd>
+                    <dt>User agent</dt><dd><?= Security::e($lead['user_agent']) ?></dd>
                     <dt>Consentimiento</dt><dd><?= $lead['consent'] ? 'Sí' : 'No' ?></dd>
                 </dl>
 
                 <h2>Mensaje</h2>
                 <div class="message card"><?= nl2br(Security::e($lead['message'])) ?></div>
+
+                <?php if ($prettyPayload): ?>
+                    <h2>Datos completos recibidos</h2>
+                    <div class="message card"><pre style="white-space:pre-wrap;word-break:break-word;margin:0"><?= Security::e($prettyPayload) ?></pre></div>
+                <?php endif; ?>
             </section>
 
             <aside class="card">

@@ -16,6 +16,30 @@ $repository = new LeadRepository();
 $leads = $repository->list($filters, 150);
 
 $queryString = http_build_query(array_filter($filters));
+
+function landing_label(?string $url): string
+{
+    if (!$url) {
+        return '';
+    }
+
+    $path = parse_url($url, PHP_URL_PATH) ?: '/';
+    $query = parse_url($url, PHP_URL_QUERY);
+
+    return $query ? $path . '?' . $query : $path;
+}
+
+function external_url(?string $url): string
+{
+    $url = trim((string) $url);
+    if ($url === '') {
+        return '';
+    }
+
+    return str_starts_with($url, 'http://') || str_starts_with($url, 'https://')
+        ? $url
+        : 'https://' . $url;
+}
 ?>
 <!doctype html>
 <html lang="es">
@@ -51,11 +75,11 @@ $queryString = http_build_query(array_filter($filters));
                 </div>
                 <div>
                     <label for="source_site">Web origen</label>
-                    <input id="source_site" name="source_site" value="<?= Security::e($filters['source_site']) ?>">
+                    <input id="source_site" name="source_site" value="<?= Security::e($filters['source_site']) ?>" placeholder="daferrer.es">
                 </div>
                 <div>
                     <label for="q">Buscar</label>
-                    <input id="q" name="q" value="<?= Security::e($filters['q']) ?>" placeholder="Nombre, email, teléfono, mensaje...">
+                    <input id="q" name="q" value="<?= Security::e($filters['q']) ?>" placeholder="Nombre, email, teléfono, web, landing, mensaje...">
                 </div>
                 <button type="submit">Filtrar</button>
                 <a class="button light" href="/admin/">Limpiar</a>
@@ -66,7 +90,7 @@ $queryString = http_build_query(array_filter($filters));
                     <tr>
                         <th>Fecha</th>
                         <th>Contacto</th>
-                        <th>Origen</th>
+                        <th>Origen / landing</th>
                         <th>Estado</th>
                         <th>Prioridad</th>
                         <th>Mensaje</th>
@@ -74,16 +98,28 @@ $queryString = http_build_query(array_filter($filters));
                 </thead>
                 <tbody>
                     <?php foreach ($leads as $lead): ?>
+                        <?php
+                            $sourceUrl = (string) ($lead['source_url'] ?? '');
+                            $clientWebsite = external_url($lead['client_website'] ?? '');
+                        ?>
                         <tr>
                             <td><?= Security::e(date('d/m/Y H:i', strtotime($lead['created_at']))) ?></td>
                             <td>
                                 <a href="/admin/lead.php?id=<?= Security::e($lead['id']) ?>"><strong><?= Security::e($lead['name'] ?: 'Sin nombre') ?></strong></a><br>
                                 <span class="small"><?= Security::e($lead['email']) ?></span><br>
                                 <span class="small"><?= Security::e($lead['phone']) ?></span>
+                                <?php if (!empty($lead['client_website'])): ?>
+                                    <br><a class="small" href="<?= Security::e($clientWebsite) ?>" target="_blank" rel="noopener">🌐 <?= Security::e($lead['client_website']) ?></a>
+                                <?php endif; ?>
                             </td>
                             <td>
-                                <?= Security::e($lead['source_site']) ?><br>
-                                <span class="small"><?= Security::e($lead['form_name']) ?></span>
+                                <strong><?= Security::e($lead['source_site'] ?: 'Sin origen') ?></strong><br>
+                                <span class="small"><?= Security::e($lead['form_name']) ?></span><br>
+                                <?php if ($sourceUrl !== ''): ?>
+                                    <a class="small" href="<?= Security::e($sourceUrl) ?>" target="_blank" rel="noopener"><?= Security::e(landing_label($sourceUrl)) ?></a>
+                                <?php else: ?>
+                                    <span class="small">Sin URL de landing</span>
+                                <?php endif; ?>
                             </td>
                             <td><span class="badge"><?= Security::e($lead['status']) ?></span></td>
                             <td><span class="badge <?= Security::e($lead['priority']) ?>"><?= Security::e($lead['priority']) ?></span></td>
