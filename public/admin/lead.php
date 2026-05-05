@@ -44,6 +44,7 @@ $events = $repository->events($id);
                     <dt>Email</dt><dd><?= Security::e($lead['email']) ?></dd>
                     <dt>Teléfono</dt><dd><?= Security::e($lead['phone']) ?></dd>
                     <dt>Empresa</dt><dd><?= Security::e($lead['company']) ?></dd>
+                    <dt>Web del lead</dt><dd><?= !empty($lead['client_website']) ? '<a href="' . Security::e(str_starts_with($lead['client_website'], 'http') ? $lead['client_website'] : 'https://' . $lead['client_website']) . '" target="_blank" rel="noopener">' . Security::e($lead['client_website']) . '</a>' : '' ?></dd>
                     <dt>Web origen</dt><dd><?= Security::e($lead['source_site']) ?></dd>
                     <dt>URL origen</dt><dd><?= $lead['source_url'] ? '<a href="' . Security::e($lead['source_url']) . '" target="_blank" rel="noopener">' . Security::e($lead['source_url']) . '</a>' : '' ?></dd>
                     <dt>Formulario</dt><dd><?= Security::e($lead['form_name']) ?></dd>
