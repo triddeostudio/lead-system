@@ -1,8 +1,8 @@
 FROM php:8.3-apache
 
 RUN apt-get update \
-    && apt-get install -y libpq-dev libonig-dev unzip \
-    && docker-php-ext-install pdo pdo_pgsql mbstring \
+    && apt-get install -y libpq-dev libonig-dev libcurl4-openssl-dev unzip \
+    && docker-php-ext-install pdo pdo_pgsql mbstring curl \
     && a2enmod rewrite headers \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
