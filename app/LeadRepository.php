@@ -51,7 +51,11 @@ final class LeadRepository
         ]);
 
         $id = $stmt->fetchColumn();
-        $this->addEvent((string) $id, 'lead_created', ['source_site' => $lead['source_site'] ?? null], 'system');
+        $this->addEvent((string) $id, 'lead_created', [
+            'source_site' => $lead['source_site'] ?? null,
+            'form_name' => $lead['form_name'] ?? null,
+            'extra_fields' => LeadFields::extraFieldsToPlainArray($lead['extra_fields'] ?? []),
+        ], 'system');
 
         return (string) $id;
     }
@@ -72,8 +76,23 @@ final class LeadRepository
             $params['source_site'] = '%' . $filters['source_site'] . '%';
         }
 
+        if (!empty($filters['form_name'])) {
+            $where[] = 'form_name ILIKE :form_name';
+            $params['form_name'] = '%' . $filters['form_name'] . '%';
+        }
+
         if (!empty($filters['q'])) {
-            $where[] = '(name ILIKE :q OR email ILIKE :q OR phone ILIKE :q OR message ILIKE :q OR company ILIKE :q OR client_website ILIKE :q)';
+            $where[] = '(
+                name ILIKE :q
+                OR email ILIKE :q
+                OR phone ILIKE :q
+                OR message ILIKE :q
+                OR company ILIKE :q
+                OR client_website ILIKE :q
+                OR source_url ILIKE :q
+                OR form_name ILIKE :q
+                OR raw_payload::text ILIKE :q
+            )';
             $params['q'] = '%' . $filters['q'] . '%';
         }
 

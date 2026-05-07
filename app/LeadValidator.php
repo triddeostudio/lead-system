@@ -14,6 +14,8 @@ final class LeadValidator
         $company = Security::cleanString($input['company'] ?? $input['empresa'] ?? null, 200);
         $clientWebsite = Security::cleanString($input['website'] ?? $input['client_website'] ?? $input['website_url'] ?? $input['web'] ?? null, 500);
         $message = Security::cleanString($input['message'] ?? $input['mensaje'] ?? null, 5000);
+        $rawPayload = LeadFields::cleanRawPayload($input);
+        $extraFields = LeadFields::extractExtraFields($rawPayload);
 
         if (!$email && !$phone) {
             $errors['contact'] = 'Introduce email o teléfono.';
@@ -25,6 +27,10 @@ final class LeadValidator
 
         if ($phone && !preg_match('/^[0-9+().\s-]{6,50}$/', $phone)) {
             $errors['phone'] = 'El teléfono no es válido.';
+        }
+
+        if ($clientWebsite && !self::looksLikeWebsite($clientWebsite)) {
+            $errors['website'] = 'La web no parece válida.';
         }
 
         if ($errors !== []) {
@@ -53,8 +59,18 @@ final class LeadValidator
             'priority' => self::detectPriority($message, $input),
             'consent' => Security::boolFromInput($input['consent'] ?? $input['privacidad'] ?? false),
             'spam_score' => 0,
-            'raw_payload' => $input,
+            'raw_payload' => $rawPayload,
+            'extra_fields' => $extraFields,
         ]];
+    }
+
+    private static function looksLikeWebsite(string $website): bool
+    {
+        if (filter_var($website, FILTER_VALIDATE_URL)) {
+            return true;
+        }
+
+        return (bool) preg_match('/^[a-z0-9.-]+\.[a-z]{2,}(\/.*)?$/i', $website);
     }
 
     private static function detectPriority(?string $message, array $input): string

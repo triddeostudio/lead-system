@@ -9,6 +9,7 @@ Auth::require();
 $filters = [
     'status' => Security::cleanString($_GET['status'] ?? null, 40),
     'source_site' => Security::cleanString($_GET['source_site'] ?? null, 255),
+    'form_name' => Security::cleanString($_GET['form_name'] ?? null, 120),
     'q' => Security::cleanString($_GET['q'] ?? null, 255),
 ];
 
@@ -41,11 +42,14 @@ fputcsv($output, [
     'ip',
     'user_agent',
     'consentimiento',
+    'campos_adicionales_json',
     'notas',
     'raw_payload',
 ]);
 
 foreach ($leads as $lead) {
+    $extraFields = LeadFields::extractExtraFieldsFromRawPayload($lead['raw_payload'] ?? null);
+
     fputcsv($output, [
         Time::format($lead['created_at'], 'Y-m-d H:i:s'),
         $lead['name'],
@@ -68,6 +72,7 @@ foreach ($leads as $lead) {
         $lead['ip_address'],
         $lead['user_agent'],
         $lead['consent'] ? 'sí' : 'no',
+        json_encode(LeadFields::extraFieldsToPlainArray($extraFields), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
         $lead['notes'],
         $lead['raw_payload'],
     ]);

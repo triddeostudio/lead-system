@@ -40,6 +40,7 @@ final class MailService
                 'event' => 'lead_created',
                 'lead_id' => $leadId,
                 'lead' => $lead,
+                'extra_fields' => LeadFields::extraFieldsToPlainArray($lead['extra_fields'] ?? []),
             ], []);
         } catch (Throwable $exception) {
             Logger::error('n8n webhook notification failed.', ['error' => $exception->getMessage(), 'lead_id' => $leadId]);
@@ -123,10 +124,13 @@ final class MailService
             'Email' => $lead['email'] ?? '',
             'Teléfono' => $lead['phone'] ?? '',
             'Empresa' => $lead['company'] ?? '',
+            'Web del lead' => $lead['client_website'] ?? '',
             'Mensaje' => nl2br(Security::e($lead['message'] ?? '')),
             'Web origen' => $lead['source_site'] ?? '',
             'URL origen' => $lead['source_url'] ?? '',
+            'Formulario' => $lead['form_name'] ?? '',
             'UTM source' => $lead['utm_source'] ?? '',
+            'UTM medium' => $lead['utm_medium'] ?? '',
             'UTM campaign' => $lead['utm_campaign'] ?? '',
             'Prioridad' => $lead['priority'] ?? '',
         ];
@@ -136,6 +140,17 @@ final class MailService
             $safeValue = $label === 'Mensaje' ? (string) $value : Security::e((string) $value);
             $html .= '<tr><th align="left">' . Security::e($label) . '</th><td>' . $safeValue . '</td></tr>';
         }
+
+        $extraFields = $lead['extra_fields'] ?? [];
+        if (is_array($extraFields) && $extraFields !== []) {
+            $html .= '<tr><th colspan="2" align="left" style="background:#f6f7f9">Campos adicionales</th></tr>';
+            foreach ($extraFields as $field) {
+                $label = (string) ($field['label'] ?? 'Campo adicional');
+                $value = LeadFields::valueToString($field['value'] ?? '');
+                $html .= '<tr><th align="left">' . Security::e($label) . '</th><td>' . nl2br(Security::e($value)) . '</td></tr>';
+            }
+        }
+
         $html .= '</table>';
 
         if ($leadUrl !== '') {
