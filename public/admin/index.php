@@ -9,6 +9,7 @@ Auth::require();
 $filters = [
     'status' => Security::cleanString($_GET['status'] ?? null, 40),
     'source_site' => Security::cleanString($_GET['source_site'] ?? null, 255),
+    'form_name' => Security::cleanString($_GET['form_name'] ?? null, 120),
     'q' => Security::cleanString($_GET['q'] ?? null, 255),
 ];
 
@@ -78,8 +79,12 @@ function external_url(?string $url): string
                     <input id="source_site" name="source_site" value="<?= Security::e($filters['source_site']) ?>" placeholder="daferrer.es">
                 </div>
                 <div>
+                    <label for="form_name">Formulario</label>
+                    <input id="form_name" name="form_name" value="<?= Security::e($filters['form_name']) ?>" placeholder="cta_contacto_automatizaciones">
+                </div>
+                <div>
                     <label for="q">Buscar</label>
-                    <input id="q" name="q" value="<?= Security::e($filters['q']) ?>" placeholder="Nombre, email, teléfono, web, landing, mensaje...">
+                    <input id="q" name="q" value="<?= Security::e($filters['q']) ?>" placeholder="Nombre, email, teléfono, web, landing, campos extra...">
                 </div>
                 <button type="submit">Filtrar</button>
                 <a class="button light" href="/admin/">Limpiar</a>
@@ -93,7 +98,7 @@ function external_url(?string $url): string
                         <th>Origen / landing</th>
                         <th>Estado</th>
                         <th>Prioridad</th>
-                        <th>Mensaje</th>
+                        <th>Mensaje / extras</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -101,6 +106,7 @@ function external_url(?string $url): string
                         <?php
                             $sourceUrl = (string) ($lead['source_url'] ?? '');
                             $clientWebsite = external_url($lead['client_website'] ?? '');
+                            $extraFields = LeadFields::extractExtraFieldsFromRawPayload($lead['raw_payload'] ?? null);
                         ?>
                         <tr>
                             <td><?= Security::e(Time::format($lead['created_at'])) ?></td>
@@ -123,7 +129,12 @@ function external_url(?string $url): string
                             </td>
                             <td><span class="badge"><?= Security::e($lead['status']) ?></span></td>
                             <td><span class="badge <?= Security::e($lead['priority']) ?>"><?= Security::e($lead['priority']) ?></span></td>
-                            <td><?= Security::e(mb_substr((string) $lead['message'], 0, 160)) ?></td>
+                            <td>
+                                <?= Security::e(mb_substr((string) $lead['message'], 0, 160)) ?>
+                                <?php if ($extraFields !== []): ?>
+                                    <br><span class="small"><?= count($extraFields) ?> campo<?= count($extraFields) === 1 ? '' : 's' ?> adicional<?= count($extraFields) === 1 ? '' : 'es' ?></span>
+                                <?php endif; ?>
+                            </td>
                         </tr>
                     <?php endforeach; ?>
                     <?php if ($leads === []): ?>

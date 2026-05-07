@@ -13,6 +13,7 @@ require_once __DIR__ . '/RateLimiter.php';
 require_once __DIR__ . '/Turnstile.php';
 require_once __DIR__ . '/LeadRepository.php';
 require_once __DIR__ . '/LeadValidator.php';
+require_once __DIR__ . '/LeadFields.php';
 require_once __DIR__ . '/MailService.php';
 require_once __DIR__ . '/Auth.php';
 require_once __DIR__ . '/Time.php';

@@ -31,11 +31,15 @@ function detail_external_url(?string $url): string
 }
 
 $rawPayload = $lead['raw_payload'] ?? '';
+$decodedPayload = [];
 $prettyPayload = '';
 if ($rawPayload) {
-    $decodedPayload = json_decode((string) $rawPayload, true);
+    $decoded = json_decode((string) $rawPayload, true);
+    $decodedPayload = is_array($decoded) ? $decoded : [];
     $prettyPayload = json_encode($decodedPayload ?: $rawPayload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 }
+
+$extraFields = LeadFields::extractExtraFieldsFromRawPayload($decodedPayload);
 ?>
 <!doctype html>
 <html lang="es">
@@ -76,6 +80,8 @@ if ($rawPayload) {
                             <a href="<?= Security::e($lead['source_url']) ?>" target="_blank" rel="noopener"><?= Security::e($lead['source_url']) ?></a>
                         <?php endif; ?>
                     </dd>
+                    <dt>Ruta</dt><dd><?= Security::e((string) ($decodedPayload['source_path'] ?? '')) ?></dd>
+                    <dt>Título página</dt><dd><?= Security::e((string) ($decodedPayload['page_title'] ?? '')) ?></dd>
                     <dt>Formulario</dt><dd><?= Security::e($lead['form_name']) ?></dd>
                     <dt>Referrer</dt>
                     <dd>
@@ -95,6 +101,16 @@ if ($rawPayload) {
 
                 <h2>Mensaje</h2>
                 <div class="message card"><?= nl2br(Security::e($lead['message'])) ?></div>
+
+                <?php if ($extraFields !== []): ?>
+                    <h2>Campos adicionales</h2>
+                    <dl class="meta">
+                        <?php foreach ($extraFields as $field): ?>
+                            <dt><?= Security::e((string) ($field['label'] ?? 'Campo')) ?></dt>
+                            <dd><?= nl2br(Security::e(LeadFields::valueToString($field['value'] ?? ''))) ?></dd>
+                        <?php endforeach; ?>
+                    </dl>
+                <?php endif; ?>
 
                 <?php if ($prettyPayload): ?>
                     <h2>Datos completos recibidos</h2>
