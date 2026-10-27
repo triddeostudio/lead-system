@@ -1,4 +1,4 @@
-FROM php:8.3-apache
+FROM php:8.3.36-apache
 
 RUN apt-get update \
     && apt-get install -y libpq-dev libonig-dev libcurl4-openssl-dev unzip \
@@ -6,6 +6,10 @@ RUN apt-get update \
     && a2enmod rewrite headers \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
+# Medida adicional de seguridad de PHP
+RUN printf '%s\n' 'session.upload_progress.enabled=0' \
+    > /usr/local/etc/php/conf.d/zz-security.ini
 
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 
